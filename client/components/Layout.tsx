@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import AIAssistant from "@/components/ai/AIAssistant";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -13,6 +14,7 @@ import {
   Menu,
   X,
   LogOut,
+  Bot,
 } from "lucide-react";
 
 interface LayoutProps {
@@ -31,10 +33,13 @@ export default function Layout({ children }: LayoutProps) {
     navigate("/login");
   };
 
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
+  
   const navItems = [
     { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
     { label: "Tasks", icon: CheckSquare, path: "/tasks" },
     { label: "Focus Timer", icon: Timer, path: "/timer" },
+    { label: "AI Assistant", icon: Bot, onClick: () => setIsAIAssistantOpen(true) },
     { label: "Gamification", icon: Zap, path: "/gamification" },
     { label: "Analytics", icon: BarChart3, path: "/analytics" },
     { label: "Mindfulness", icon: Wind, path: "/mindfulness" },
@@ -63,6 +68,24 @@ export default function Layout({ children }: LayoutProps) {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
+              
+              if (item.onClick) {
+                return (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                      isActive
+                        ? "bg-cyan-500/20 text-cyan-400"
+                        : "text-slate-400 hover:text-slate-300 hover:bg-slate-800"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                );
+              }
+              
               return (
                 <Link
                   key={item.path}
@@ -122,18 +145,39 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+          {/* Mobile Menu */}
         {isMenuOpen && (
           <nav className="lg:hidden border-t border-slate-800 bg-slate-800/50 backdrop-blur p-4 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
+              
+              if (item.onClick) {
+                return (
+                  <button
+                    key={item.label}
+                    onClick={() => {
+                      item.onClick?.();
+                      setIsMenuOpen(false);
+                    }}
+                    className={`flex items-center gap-3 w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-cyan-500/20 text-cyan-400"
+                        : "text-slate-400 hover:text-slate-300 hover:bg-slate-700"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                );
+              }
+              
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-cyan-500/20 text-cyan-400"
                       : "text-slate-400 hover:text-slate-300 hover:bg-slate-700"
@@ -186,6 +230,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto">
           {children}
+          <AIAssistant open={isAIAssistantOpen} onOpenChange={setIsAIAssistantOpen} />
         </main>
       </div>
     </div>
